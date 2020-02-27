@@ -63,7 +63,7 @@ func (w *worker) startServers() {
 	for i, l := range w.listeners {
 		err := w.services[i].startFunc(l)
 		if err != nil {
-			log.Printf("[warning]worker start service error: %v, service is %v", err, w.services)
+			log.Printf("[warning]worker <%d> start service error: %v, service is %s", syscall.Getpid() ,err, w.services[i].addr)
 		}
 	}
 }
