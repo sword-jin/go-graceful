@@ -4,6 +4,8 @@
 
 Inspired by [graceful](https://github.com/kuangchanglang/graceful) and [overseer](https://github.com/jpillora/overseer), for support some framework.
 
+\>= go1.8
+
 ### Feature
 
 * multi service, port
