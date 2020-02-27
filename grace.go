@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	// path env to given child proc
 	EnvWorker       = "ENV_WORKER"
 	EnvWorkerVal    = "1"
 	EnvOldWorkerPid = "ENV_OLD_WORKER_PID"
@@ -16,12 +17,12 @@ const (
 
 var (
 	defaultWatchInterval             = time.Second
-	defaultStopTimeout               = 20 * time.Second
 	defaultReloadSignals             = []syscall.Signal{syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGUSR2}
 	defaultStopSignals               = []syscall.Signal{syscall.SIGKILL, syscall.SIGTERM, syscall.SIGINT}
 	defaultMaxConnectionNumber int64 = 10000
 )
 
+// Grace server
 type Grace struct {
 	opt      *option
 	addr     Address
@@ -34,19 +35,21 @@ type service struct {
 	shutdownFunc func() error
 }
 
+// tcp address
 type Address struct {
 	addr    string
 	network string //tcp, unix
 }
 
+// NewAddress
 func NewAddress(addr, network string) Address {
 	return Address{addr, network}
 }
 
+// New return Grace
 func New(opts ...Option) *Grace {
 	option := &option{
 		watchInterval:         defaultWatchInterval,
-		stopTimeout:           defaultStopTimeout,
 		stopSignals:           defaultStopSignals,
 		reloadSignals:         defaultReloadSignals,
 		enableConnectionLimit: false,
@@ -61,6 +64,7 @@ func New(opts ...Option) *Grace {
 	}
 }
 
+// RegisterService can register multi addr port like http and https
 func (g *Grace) RegisterService(addr Address, startFun func(ln net.Listener) error, shutdownFun func() error) {
 	g.services = append(g.services, &service{
 		addr:         addr,
@@ -69,8 +73,9 @@ func (g *Grace) RegisterService(addr Address, startFun func(ln net.Listener) err
 	})
 }
 
+// Run grace
 func (g *Grace) Run() error {
-	if IsWorker() {
+	if isWorker() {
 		log.Printf("[info]Worker here, pid=%v", syscall.Getpid())
 		worker := &worker{
 			opt:       g.opt,
@@ -89,12 +94,12 @@ func (g *Grace) Run() error {
 	return master.run(g.services)
 }
 
-func IsWorker() bool {
+func isWorker() bool {
 	return os.Getenv(EnvWorker) == EnvWorkerVal
 }
 
-func IsMaster() bool {
-	return !IsWorker()
+func isMaster() bool {
+	return !isWorker()
 }
 
 type option struct {
@@ -108,30 +113,28 @@ type option struct {
 
 type Option func(o *option)
 
-func WithStopTimeout(timeout time.Duration) Option {
-	return func(o *option) {
-		o.stopTimeout = timeout
-	}
-}
-
+// WithWatchInterval, worker watch master, if master down, we exit worker.
 func WithWatchInterval(timeout time.Duration) Option {
 	return func(o *option) {
 		o.watchInterval = timeout
 	}
 }
 
+// WithWatchInterval set reload signals
 func WithReloadSignals(reloadSignals []syscall.Signal) Option {
 	return func(o *option) {
 		o.reloadSignals = reloadSignals
 	}
 }
 
+// WithWatchInterval set stop signals
 func WithStopSignals(stopSignals []syscall.Signal) Option {
 	return func(o *option) {
 		o.stopSignals = stopSignals
 	}
 }
 
+// WithConnectionLimit set connection limit
 func WithConnectionLimit(enable bool, limit int64) Option {
 	return func(o *option) {
 		o.enableConnectionLimit = enable

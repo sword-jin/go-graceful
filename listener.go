@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Listener for limit connection, and set keepalive
 type Listener struct {
 	*net.TCPListener
 
@@ -36,14 +37,6 @@ func newListener(tl *net.TCPListener, enableLimit bool, limitNumber int64) net.L
 type connLimit struct {
 	enable bool
 	number int64
-}
-
-func (l *Listener) Fd() (uintptr, error) {
-	file, err := l.TCPListener.File()
-	if err != nil {
-		return 0, err
-	}
-	return file.Fd(), nil
 }
 
 // override
@@ -87,6 +80,7 @@ func (l *Listener) acquire() bool {
 
 func (l *Listener) release() { <-l.sem }
 
+// override
 type ListenerConn struct {
 	net.Conn
 	enableLimit bool
@@ -94,6 +88,7 @@ type ListenerConn struct {
 	release     func()
 }
 
+// override
 func (l *ListenerConn) Close() error {
 	err := l.Conn.Close()
 	if l.enableLimit {
