@@ -45,8 +45,20 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 ```
+
+default reload signals syscall.SIGHUP, syscall.SIGUSR1, syscall.SIGUSR2
+
+so `crul 127.0.0.1:8124`
+```bash
+$ Hello world, pid = 13435, ppid=13434
+
+$ kill -USR1 13434
+
+$ curl 127.0.0.1:8124
+Hello world, pid = 13479, ppid=13434
+``` 
+
 
 use iris
 
@@ -68,3 +80,5 @@ if err != nil {
     log.Fatal(err)
 }
 ```
+
+alse fasthttp example and other framework.
