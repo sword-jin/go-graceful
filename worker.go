@@ -54,7 +54,11 @@ func (w *worker) initListeners() error {
 		if err != nil {
 			return err
 		}
-		w.listeners = append(w.listeners, newListener(l.(*net.TCPListener), w.opt.enableConnectionLimit, w.opt.maxConnectionNumber))
+                if w.opt.enableConnectionLimit {
+                    w.listeners = append(w.listeners, newListener(l.(*net.TCPListener), w.opt.enableConnectionLimit, w.opt.maxConnectionNumber))
+                } else {
+                    w.listeners = append(w.listeners, l)
+                }
 	}
 	return nil
 }

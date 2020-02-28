@@ -98,13 +98,8 @@ func isWorker() bool {
 	return os.Getenv(EnvWorker) == EnvWorkerVal
 }
 
-func isMaster() bool {
-	return !isWorker()
-}
-
 type option struct {
 	watchInterval         time.Duration
-	stopTimeout           time.Duration
 	reloadSignals         []syscall.Signal
 	stopSignals           []syscall.Signal
 	enableConnectionLimit bool
