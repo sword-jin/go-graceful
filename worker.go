@@ -65,10 +65,12 @@ func (w *worker) initListeners() error {
 
 func (w *worker) startServers() {
 	for i, l := range w.listeners {
-		err := w.services[i].startFunc(l)
-		if err != nil {
-			log.Printf("[warning]worker <%d> start service error: %v, service is %s", syscall.Getpid() ,err, w.services[i].addr)
-		}
+		go func(i int, l net.Listener) {
+			err := w.services[i].startFunc(l)
+			if err != nil {
+				log.Fatalf("[warning]worker <%d> start service error: %v, service is %s", syscall.Getpid() ,err, w.services[i].addr)
+			}
+		}(i, l)
 	}
 }
 

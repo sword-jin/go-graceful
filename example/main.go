@@ -28,6 +28,13 @@ func main() {
 		return srv.Shutdown(context.Background())
 	})
 
+	srv2 := &http.Server{Handler: mux}
+	grace.RegisterService(graceful.NewAddress("127.0.0.1:8125", "tcp"), func(ln net.Listener) error {
+		return srv2.Serve(ln)
+	}, func() error {
+		return srv2.Shutdown(context.Background())
+	})
+
 	err := grace.Run()
 	if err != nil {
 		log.Fatal(err)
